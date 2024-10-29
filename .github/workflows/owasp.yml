@@ -1,0 +1,26 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2 
+      
+      # Додайте крок для скачування архіву з GitHub
+      - name: Download Archive
+        run: |
+          curl -L -o archive.zip https://github.com/jeremylong/DependencyCheck/releases/download/v11.0.0/dependency-check-11.0.0-release.zip
+      
+      # Розархівуйте скачаний файл
+      - name: Unzip Archive
+        run: |
+          unzip archive.zip
+          
+      # Запуск sh
+      - name: Run sh OWASP
+        run: |
+          cd dependency-check/bin
+          ./dependency-check.sh --project "OwaspTest" --out "${{ github.workspace }}/TestResults/dependency-check" --scan "${{ github.workspace }}" --format HTML --nvdApiKey da18e505-9cc8-4d83-b15a-0ff94bb6b245
