@@ -24,3 +24,10 @@ jobs:
         run: |
           cd dependency-check/bin
           ./dependency-check.sh --project "OwaspTest" --out "${{ github.workspace }}/TestResults/dependency-check" --scan "${{ github.workspace }}" --format HTML --nvdApiKey da18e505-9cc8-4d83-b15a-0ff94bb6b245
+
+      # Завантаження результату як артефакту
+      - name: Upload Dependency Check Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: ${{ github.workspace }}/TestResults/dependency-check
