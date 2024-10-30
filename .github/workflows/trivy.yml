@@ -2,19 +2,28 @@ name: trivy
 
 on:
   workflow_dispatch:  # Додаємо можливість ручного запуску
-  
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-20.04
+    
     steps:
+      - name: Cache Trivy DB
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-db
+          restore-keys: |
+            ${{ runner.os }}-trivy-db
+
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Build an image from Dockerfile
         run: |
           docker build -t docker.io/my-organization/test:${{ github.sha }} .
-      
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -22,7 +31,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          format: 'sarif'  # Використовуємо новий формат замість шаблону
+          format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
