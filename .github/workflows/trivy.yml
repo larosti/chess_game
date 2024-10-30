@@ -1,6 +1,8 @@
 name: trivy
+
 on:
   workflow_dispatch:  # Додаємо можливість ручного запуску
+  
 jobs:
   build:
     name: Build
@@ -12,7 +14,7 @@ jobs:
       - name: Build an image from Dockerfile
         run: |
           docker build -t docker.io/my-organization/test:${{ github.sha }} .
-
+      
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -20,8 +22,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          format: 'sarif'  # Використовуємо новий формат замість шаблону
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
