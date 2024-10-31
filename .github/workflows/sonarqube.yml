@@ -13,10 +13,19 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           
+      # Крок для встановлення OWASP Dependency-Check
+      - name: Install OWASP Dependency-Check
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jre  # Потрібна Java для роботи Dependency-Check
+          curl -LO https://github.com/jeremylong/DependencyCheck/releases/download/v8.2.1/dependency-check-8.2.1-release.zip
+          unzip dependency-check-8.2.1-release.zip -d dependency-check
+          export PATH=$PATH:$(pwd)/dependency-check/bin
+          
       # Крок для запуску OWASP Dependency-Check
       - name: Run OWASP Dependency-Check
         run: |
-          dependency-check --project "chess_game" --scan . --format "ALL" --out "./dependency-check-report"
+          dependency-check/bin/dependency-check.sh --project "chess_game" --scan . --format "ALL" --out "./dependency-check-report"
       
       # Налаштування шляху до звіту в SonarQube
       - uses: sonarsource/sonarqube-scan-action@v3
