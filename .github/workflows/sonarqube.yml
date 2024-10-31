@@ -2,9 +2,6 @@ name: sonarqube
 
 on:
   workflow_dispatch:  # Додаємо можливість ручного запуску
-  # push:
-  #   branches:
-  #     - main
 
 jobs:
   build:
@@ -15,7 +12,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          
+      # Крок для запуску OWASP Dependency-Check
+      - name: Run OWASP Dependency-Check
+        run: |
+          dependency-check --project "MyProject" --scan . --format "ALL" --out "./dependency-check-report"
+      
+      # Налаштування шляху до звіту в SonarQube
       - uses: sonarsource/sonarqube-scan-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: |
+            -Dsonar.dependencyCheck.htmlReportPath=dependency-check-report/dependency-check-report.html
