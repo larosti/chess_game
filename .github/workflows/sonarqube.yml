@@ -13,19 +13,21 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           
-      # Крок для встановлення OWASP Dependency-Check
-      - name: Install OWASP Dependency-Check
+      # Додайте крок для скачування архіву з GitHub
+      - name: Download Archive
         run: |
-          sudo apt-get update
-          sudo apt-get install -y default-jre  # Потрібна Java для роботи Dependency-Check
-          curl -LO https://github.com/jeremylong/DependencyCheck/releases/download/v8.2.1/dependency-check-8.2.1-release.zip
-          unzip dependency-check-8.2.1-release.zip -d dependency-check
-          export PATH=$PATH:$(pwd)/dependency-check/bin
+          curl -L -o archive.zip https://github.com/jeremylong/DependencyCheck/releases/download/v11.0.0/dependency-check-11.0.0-release.zip
+      
+      # Розархівуйте скачаний файл
+      - name: Unzip Archive
+        run: |
+          unzip archive.zip
           
-      # Крок для запуску OWASP Dependency-Check
-      - name: Run OWASP Dependency-Check
+      # Запуск sh
+      - name: Run sh OWASP
         run: |
-          dependency-check --project "chess_game" --scan . --format "ALL" --out "./dependency-check-report"
+          cd dependency-check/bin
+          ./dependency-check.sh --project "OwaspTest" --out "${{ github.workspace }}/TestResults/dependency-check" --scan "${{ github.workspace }}" --format HTML --nvdApiKey da18e505-9cc8-4d83-b15a-0ff94bb6b245
       
       # Налаштування шляху до звіту в SonarQube
       - uses: sonarsource/sonarqube-scan-action@v3
@@ -34,4 +36,4 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: |
-            -Dsonar.dependencyCheck.htmlReportPath=dependency-check-report/dependency-check-report.html
+            -Dsonar.dependencyCheck.htmlReportPath=${{ github.workspace }}/TestResults/dependency-check/dependency-check-report.html
