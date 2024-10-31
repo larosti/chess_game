@@ -16,7 +16,7 @@ jobs:
       # Крок для запуску OWASP Dependency-Check
       - name: Run OWASP Dependency-Check
         run: |
-          dependency-check --project "MyProject" --scan . --format "ALL" --out "./dependency-check-report"
+          dependency-check --project "chess_game" --scan . --format "ALL" --out "./dependency-check-report"
       
       # Налаштування шляху до звіту в SonarQube
       - uses: sonarsource/sonarqube-scan-action@v3
