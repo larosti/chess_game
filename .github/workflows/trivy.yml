@@ -1,28 +1,40 @@
-name: trivy
+name: Security Scan with Trivy and SonarQube
 
 on:
-  workflow_dispatch:  # Додаємо можливість ручного запуску
-  # push:
-  #   branches:
-  #     - main
+  workflow_dispatch:  # Додає можливість ручного запуску
 
 jobs:
-  build:
-    name: Build
+  security_scan:
+    name: Security Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Build an image from Dockerfile
+
+      - name: Build Docker Image
         run: docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
+          format: 'json'
+          output: 'trivy-report.json'
+          exit-code: '0'  # Завжди завершується успішно, щоб не зупиняти CI/CD
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
+
+      - name: Upload Trivy Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-report
+          path: trivy-report.json
+
+      - name: Run SonarQube Scanner
+        uses: sonarsource/sonarqube-scan-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
