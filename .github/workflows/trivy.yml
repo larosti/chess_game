@@ -2,40 +2,24 @@ name: trivy
 
 on:
   workflow_dispatch:  # Додаємо можливість ручного запуску
-
+  # push:
+  #   branches:
+  #     - main
 jobs:
   build:
-    name: Build
+    name: trivy
     runs-on: ubuntu-20.04
-    
     steps:
-      - name: Cache Trivy DB
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/trivy
-          key: ${{ runner.os }}-trivy-db
-          restore-keys: |
-            ${{ runner.os }}-trivy-db
-
       - name: Checkout code
         uses: actions/checkout@v3
-
       - name: Build an image from Dockerfile
-        run: |
-          docker build -t docker.io/my-organization/test:${{ github.sha }} .
-
+        run: docker build -t chessgame:${{ github.sha }} .
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: 'docker.io/my-organization/test:${{ github.sha }}'
+          image-ref: 'chessgame:${{ github.sha }}'
+          format: 'table'
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
