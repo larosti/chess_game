@@ -1,4 +1,4 @@
-name: Security Scan with Trivy and SonarQube
+name: Trivy and SonarQube
 
 on:
   workflow_dispatch:  # Додає можливість ручного запуску
